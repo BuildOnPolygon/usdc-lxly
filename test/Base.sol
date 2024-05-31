@@ -32,6 +32,9 @@ library Events {
     // copy of NativeConverter.Convert
     event Convert(address indexed from, address indexed to, uint256 amount);
 
+    // copy of NativeConverter.Deconvert
+    event Deconvert(address indexed from, address indexed to, uint256 amount);
+
     // copy of L1Escrow.Deposit
     event Deposit(address indexed from, address indexed to, uint256 amount);
 

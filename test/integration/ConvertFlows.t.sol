@@ -186,4 +186,38 @@ contract ConvertFlows is Base {
 
         _assertUsdcSupplyAndBalancesMatch();
     }
+
+    function testConverNativeUsdcToWrappedUsdc() public {
+        vm.selectFork(_l2Fork);
+        vm.startPrank(_alice);
+
+        // setup: alice converts wrapped to native ("seeding" the nativeconverter) and sends to bob
+        uint256 amount = _toUSDC(10000);
+        _erc20L2Wusdc.approve(address(_nativeConverter), amount);
+        _nativeConverter.convert(_bob, amount, _emptyBytes);
+        vm.stopPrank();
+
+        // deconvert
+        vm.startPrank(_bob);
+
+        // frank has no wrapped
+        uint256 wrappedBalance1 = _erc20L2Wusdc.balanceOf(_frank);
+        assertEq(wrappedBalance1, 0);
+
+        // bob converts 8k native to wrapped, with frank as the receiver
+        uint256 amount2 = _toUSDC(8000);
+        _erc20L2Usdc.approve(address(_nativeConverter), amount2);
+
+        // check that our convert event is emitted
+        vm.expectEmit(address(_nativeConverter));
+        emit Events.Deconvert(_bob, _frank, amount2);
+
+        _nativeConverter.deconvert(_frank, amount2, _emptyBytes);
+
+        // frank has 8k wrapped
+        uint256 wrappedBalance2 = _erc20L2Wusdc.balanceOf(_frank);
+        assertEq(wrappedBalance2, amount2);
+
+        _assertUsdcSupplyAndBalancesMatch();
+    }
 }
