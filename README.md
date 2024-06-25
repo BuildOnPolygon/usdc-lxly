@@ -8,9 +8,9 @@
 
 ## Contracts
 
-- [**BridgedWrapped USDC**](https://zkevm.polygonscan.com/address/0xA8CE8aee21bC2A48a5EF670afCc9274C7bbbC035) (zkEVM) - existing token for USDC in zkEVM, created by the Polygon ZkEVMBridge using the default TokenWrapped ERC20 contract. 
+- [**BridgedWrapped USDC**](https://zkevm.polygonscan.com/address/0xA8CE8aee21bC2A48a5EF670afCc9274C7bbbC035) (zkEVM) - existing token for USDC in zkEVM, created by the Polygon ZkEVMBridge using the default TokenWrapped ERC20 contract.
 
-- [**USDC-e**](https://zkevm.polygonscan.com/address/0x37eAA0eF3549a5Bb7D431be78a3D99BD360d19e5) (zkEVM) - "Native" USDC in zkEVM. This contract matches the current USDC contract deployed on Ethereum, with all expected features. The contract address is different from the current "bridge wrapped" USDC in use today, and has the ability to issue and burn tokens as well as "blacklist" addresses. [See USDC-e project](https://github.com/omnifient/usdc-e).
+- [**USDC-e**](https://zkevm.polygonscan.com/address/0x37eAA0eF3549a5Bb7D431be78a3D99BD360d19e5) (zkEVM) - "Native" USDC in zkEVM. This contract matches the current USDC contract deployed on Ethereum, with all expected features. The contract address is different from the current "bridge wrapped" USDC in use today, and has the ability to issue and burn tokens as well as "blacklist" addresses. [See USDC-e project](https://github.com/BuildOnPolygon/usdc-e).
 
 - [**L1Escrow**](https://etherscan.io/address/0x70E70e58ed7B1Cec0D8ef7464072ED8A52d755eB) (L1) - This contract receives L1 USDC from users, and triggers the ZkMinterBurner contract on zkEVM (through the Polygon ZkEVM Bridge) to mint USDC-e. It holds all of the L1 backing of USDC-e.
   It's also triggered by the Bridge to withdraw L1 USDC.
@@ -75,17 +75,14 @@ anvil --fork-url <https://eth-mainnet.g.alchemy.com/v2/YOUR_ALCHEMY_KEY> --chain
 anvil --fork-url <https://polygonzkevm-mainnet.g.alchemy.com/v2/YOUR_ALCHEMY_KEY> --chain-id 1101 --port 8101 --fork-block-number 3172683
 ```
 
-2. Deploy and initialize USDC-e in L2. Make sure you have the `usdc-e/` project configured.
+2. Deploy and initialize USDC-e in L2.
 
-```bash
-cd usdc-e/
-forge script script/DeployInitUSDCE.s.sol:DeployInitUSDCE --fork-url http://localhost:8101 --broadcast -vvvv
-```
+Note: you will be using Circle's USDC repo https://github.com/circlefin/stablecoin-evm/blob/master/README.md#deployment for this.
 
 3. Copy the address to where USDC-e was deployed (to be used in the next step)
 
 ```bash
-FiatTokenV2_1@0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512
+FiatTokenV2_2@0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512 # example output
 ```
 
 4. Set the USDC-e address into `usdc-lxly/.env`
@@ -120,17 +117,14 @@ forge script scripts/DeployInit.s.sol:DeployInit --broadcast -vvvv
 
 ### Deployment to Testnet/Mainnet
 
-1. Deploy and initialize USDC-e in L2. Make sure you have the `usdc-e/` project configured.
+1. Deploy and initialize USDC-e in L2.
 
-```bash
-cd usdc-e/
-forge script script/DeployInitUSDCE.s.sol:DeployInitUSDCE --fork-url https://rpc.public.zkevm-test.net --broadcast -vvvvv
-```
+Note: you will be using Circle's USDC repo https://github.com/circlefin/stablecoin-evm/blob/master/README.md#deployment for this.
 
 2. Copy the address to where USDC-e was deployed (to be used in the next step)
 
 ```bash
-FiatTokenV2_1@0x00...000
+FiatTokenV2_2@0x00...000
 ```
 
 3. Set the USDC-e address into `usdc-lxly/.env`
@@ -155,12 +149,12 @@ Use the `forge flatten` CLI tool to create a single Solidity file for each of th
 
 [Polygonscan Verification Tool](https://zkevm.polygonscan.com/verifyContract)
 
-* Use "Solidity (Single File)" for the Compiler Type
-* Use v0.8.17+commit.8df45f5f for the Compiler version
-* Use "MIT" for Open Source License Type
-* Select "Yes" from the Optimization dropdown
-* When it asks for contract source code, copy+paste in the result of `forge flatten <path_to_solidity_file>` 
-* When verifying one of the Proxy contracts which take constructor arguments, use [Hashex](https://abi.hashex.org/) to ABI-encode your constructor arguments. For the `bytes` constructor argument, simply leave the argument empty, do not pass "" as an argument, as that will be incorrect and your contract will not verify
+- Use "Solidity (Single File)" for the Compiler Type
+- Use v0.8.17+commit.8df45f5f for the Compiler version
+- Use "MIT" for Open Source License Type
+- Select "Yes" from the Optimization dropdown
+- When it asks for contract source code, copy+paste in the result of `forge flatten <path_to_solidity_file>`
+- When verifying one of the Proxy contracts which take constructor arguments, use [Hashex](https://abi.hashex.org/) to ABI-encode your constructor arguments. For the `bytes` constructor argument, simply leave the argument empty, do not pass "" as an argument, as that will be incorrect and your contract will not verify
 
 6. test contracts
 
