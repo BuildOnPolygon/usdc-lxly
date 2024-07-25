@@ -1,5 +1,9 @@
 # USDC LXLY
 
+This repo is for CDK chains, and complements Circle's Bridge Standard for USDC, by providing the "bridge contracts" (which use the canonical bridge of CDK chains).
+
+While this README mentions ZkEVM, that's simply because it was the first "CDK" chain where this was deployed.
+
 ## USDC LXLY Architecture and User Flows
 
 ![Diagram](./usdc-lxly.jpg)
