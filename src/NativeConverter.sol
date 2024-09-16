@@ -21,6 +21,7 @@ contract NativeConverter is CommonAdminOwner {
     using SafeERC20Upgradeable for IUSDC;
 
     event Convert(address indexed from, address indexed to, uint256 amount);
+    event Deconvert(address indexed from, address indexed to, uint256 amount);
     event Migrate(uint256 amount);
 
     /// @notice the PolygonZkEVMBridge deployed on the zkEVM
@@ -106,11 +107,33 @@ contract NativeConverter is CommonAdminOwner {
         emit Convert(msg.sender, receiver, amount);
     }
 
+    function deconvert(
+        address receiver,
+        uint256 amount,
+        bytes calldata permitData
+    ) external whenNotPaused {
+        require(receiver != address(0), "INVALID_RECEIVER");
+        require(amount > 0, "INVALID_AMOUNT");
+        require(amount <= zkBWUSDC.balanceOf(address(this)), "AMOUNT_TOO_LARGE");
+
+        if (permitData.length > 0)
+            LibPermit.permit(address(zkUSDCe), amount, permitData);
+
+        // transfer native usdc from user to the converter, and burn it
+        zkUSDCe.safeTransferFrom(msg.sender, address(this), amount);
+        zkUSDCe.burn(amount);
+
+        // and then send bridge wrapped usdc to the user
+        zkBWUSDC.safeTransfer(receiver, amount);
+
+        emit Deconvert(msg.sender, receiver, amount);
+    }
+
     /// @notice Migrates L2 BridgeWrappedUSDC USDC to L1 USDC
     /// @dev Any BridgeWrappedUSDC transfered in by previous calls to
     /// `convert` will be burned and the corresponding
     /// L1 USDC will be sent to the L1Escrow via a message to the bridge
-    function migrate() external whenNotPaused {
+    function migrate() external onlyOwner whenNotPaused {
         // Anyone can call migrate() on NativeConverter to
         // have all zkBridgeWrappedUSDC withdrawn via the PolygonZkEVMBridge
         // moving the L1_USDC held in the PolygonZkEVMBridge to L1Escrow
